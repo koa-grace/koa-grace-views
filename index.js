@@ -15,6 +15,12 @@ const send = require('koa-send')
 const _stat = require('fs').stat
 
 /**
+ * init config
+ */
+let config = global.config || {}
+config.constant = config.constant || {};
+
+/**
  * Check if `ext` is html.
  * @return {Boolean}
  */
@@ -107,8 +113,11 @@ module.exports = (path, opts) => {
           locals = {};
         }
 
-        let now = new Date();
+        Object.assign(locals, {
+          constant:config.constant
+        });
 
+        let now = new Date();
         if (this.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
           this.body = locals;
           return;

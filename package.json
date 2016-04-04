@@ -1,6 +1,6 @@
 {
   "name": "koa-grace-views",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Template rendering middleware for koa",
   "main": "index.js",
   "scripts": {
