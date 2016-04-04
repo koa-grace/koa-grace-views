@@ -1,6 +1,6 @@
 {
-  "name": "koa-views",
-  "version": "4.1.0",
+  "name": "koa-grace-views",
+  "version": "1.0.2",
   "description": "Template rendering middleware for koa",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "@f/defaults": "^1.0.1",
     "co-views": "^2.1.0",
     "debug": "^2.1.3",
-    "koa-send": "^3.1.0"
+    "koa-send": "^3.1.0",
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "ejs": "^2.4.1",
@@ -25,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/queckezz/koa-views"
+    "url": "https://github.com/koa-grace/koa-grace-views"
   },
   "keywords": [
     "koa",
@@ -35,9 +36,9 @@
     "templating",
     "templates"
   ],
-  "author": "queckezz",
+  "author": "xiongwilee",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/queckezz/koa-views/issues"
+    "url": "https://github.com/koa-grace/koa-grace-views/issues"
   }
 }

@@ -5,7 +5,7 @@
 [![Dependency Status][david-image]][david-url]
 [![License][license-image]][license-url]
 
-Template rendering middleware for koa.
+Template rendering middleware for koa-grace.(Forked from https://github.com/queckezz/koa-views.)
 
 ## Installation
 
