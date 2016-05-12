@@ -114,7 +114,7 @@ module.exports = (path, opts) => {
         }
 
         Object.assign(locals, {
-          constant:config.constant
+          constant: config.constant
         });
 
         let now = new Date();
@@ -135,6 +135,27 @@ module.exports = (path, opts) => {
             root: path
           })
         } else {
+          switch (opts.map.html) {
+            case 'nunjucks':
+              {
+                state.settings = {
+                  views: path,
+                  options: {
+                    noCache: opts && opts.cache === 'memory',
+                    watch: true
+                  }
+                };
+                // nunjucks引擎下，需使用G调用全局函数
+                state.G = global;
+                break;
+              }
+            case 'ect':
+              {
+                // state.ext = 'html';
+                state.root = path;
+                break;
+              }
+          }
           this.body = yield render(paths.rel, state)
         }
       }
