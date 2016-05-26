@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-const debug = require('debug')('koa-views')
+const debug = require('debug')('koa-grace:views')
 const defaults = require('@f/defaults')
 const dirname = require('path').dirname
 const extname = require('path').extname
