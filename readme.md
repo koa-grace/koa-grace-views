@@ -6,7 +6,7 @@
 [![Dependency Status][david-image]][david-url]
 [![License][license-image]][license-url]
 
-Template rendering middleware for koa.
+Template rendering middleware for koa-grace.(Forked from https://github.com/queckezz/koa-views.)
 
 > **Note:** This master branch is for koa's upcoming version `koa@2`. Take a look at the `v1.x` branch for `koa@1`.
 

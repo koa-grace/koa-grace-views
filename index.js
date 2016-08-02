@@ -1,11 +1,10 @@
-
 'use strict'
 
 /**
-* Module dependencies.
-*/
+ * Module dependencies.
+ */
 
-const debug = require('debug')('koa-views')
+const debug = require('debug')('koa-grace:views')
 const defaults = require('@f/defaults')
 const dirname = require('path').dirname
 const extname = require('path').extname
@@ -16,9 +15,15 @@ const _stat = require('fs').stat
 const consolidate = require('consolidate')
 
 /**
-* Check if `ext` is html.
-* @return {Boolean}
-*/
+ * init config
+ */
+let config = global.config || {}
+config.constant = config.constant || {};
+
+/**
+ * Check if `ext` is html.
+ * @return {Boolean}
+ */
 
 const isHtml = (ext) => ext === 'html'
 
@@ -49,8 +54,9 @@ const stat = (path) => {
  * @return {Object} tuple of { abs, rel }
  */
 
-function getPaths(abs, rel, ext) {
-  return stat(join(abs, rel)).then((stats) => {
+function* getPaths(abs, rel, ext) {
+  try {
+    const stats = yield stat(join(abs, rel))
     if (stats.isDirectory()) {
       // a directory
       return {
@@ -64,7 +70,7 @@ function getPaths(abs, rel, ext) {
       rel,
       abs
     }
-  })
+  }
   .catch((e) => {
     // not a valid file/directory
     if (!extname(rel)) {
@@ -91,8 +97,9 @@ module.exports = (path, opts) => {
 
   debug('options: %j', opts)
 
-  return function views (ctx, next) {
-    if (ctx.render) return next()
+  return function* views(next) {
+    if (this.render) return yield next
+    var render = cons(path, opts)
 
     /**
      * Render `view` with `locals` and `koa.ctx.state`.
@@ -102,10 +109,25 @@ module.exports = (path, opts) => {
      * @return {GeneratorFunction}
      * @api public
      */
-    ctx.render = function (relPath, locals) {
-      if (locals == null) {
-        locals = {}
-      }
+
+    Object.assign(this, {
+      render: function*(relPath, locals) {
+        if (locals == null) {
+          locals = {};
+        }
+
+        Object.assign(locals, {
+          constant: config.constant
+        });
+
+        let now = new Date();
+        if (this.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
+          this.body = locals;
+          return;
+        }
+
+        let ext = (extname(relPath) || '.' + opts.extension).slice(1);
+        const paths = yield getPaths(path, relPath, ext)
 
       let now = new Date();
       if (ctx.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
@@ -126,20 +148,28 @@ module.exports = (path, opts) => {
             root: path
           })
         } else {
-          let engineName = ext
-
-          if (opts.map && opts.map[ext]) {
-            engineName = opts.map[ext]
+          switch (opts.map.html) {
+            case 'nunjucks':
+              {
+                state.settings = {
+                  views: path,
+                  options: {
+                    noCache: opts && opts.cache === 'memory',
+                    watch: true
+                  }
+                };
+                // nunjucks引擎下，需使用G调用全局函数
+                state.G = global;
+                break;
+              }
+            case 'ect':
+              {
+                // state.ext = 'html';
+                state.root = path;
+                break;
+              }
           }
-
-          if (!engineName) {
-            return Promise.reject(new Error(`Engine not found for file ".${ext}" file extension`))
-          }
-
-          return consolidate[engineName](resolve(paths.abs, paths.rel), state)
-          .then((html) => {
-            ctx.body = html
-          })
+          this.body = yield render(paths.rel, state)
         }
       })
     }
