@@ -1,8 +1,4 @@
 
-## 5.0.0
-
-* `koa@2` support by @ifraixedes
-
 ## 4.1.0
 
 * [BugFix] state will pass now if no locals are passed

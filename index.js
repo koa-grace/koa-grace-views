@@ -8,11 +8,11 @@ const debug = require('debug')('koa-grace:views')
 const defaults = require('@f/defaults')
 const dirname = require('path').dirname
 const extname = require('path').extname
+const fmt = require('util').format
 const join = require('path').join
-const resolve = require('path').resolve
+const cons = require('co-views')
 const send = require('koa-send')
 const _stat = require('fs').stat
-const consolidate = require('consolidate')
 
 /**
  * init config
@@ -25,7 +25,7 @@ config.constant = config.constant || {};
  * @return {Boolean}
  */
 
-const isHtml = (ext) => ext === 'html'
+const isHtml = ext => ext == 'html'
 
 /**
  * File formatter.
@@ -37,11 +37,11 @@ const toFile = (fileName, ext) => `${fileName}.${ext}`
  * `fs.stat` promisfied.
  */
 
-const stat = (path) => {
-  return new Promise((resolve, reject) => {
+const stat = path => {
+  return new Promise((res, rej) => {
     _stat(path, (err, stats) => {
-      if (err) reject(err)
-      resolve(stats)
+      if (err) rej(err)
+      res(stats)
     })
   })
 }
@@ -70,17 +70,13 @@ function* getPaths(abs, rel, ext) {
       rel,
       abs
     }
-  }
-  .catch((e) => {
+  } catch (e) {
     // not a valid file/directory
-    if (!extname(rel)) {
-      // Template file has been provided without extension
-      // so append to it to try another lookup
-      return getPaths(abs, `${rel}.${ext}`, ext)
+    return {
+      rel: toFile(rel, ext),
+      abs: toFile(abs, ext)
     }
-
-    throw e
-  })
+  }
 }
 
 /**
@@ -90,10 +86,11 @@ function* getPaths(abs, rel, ext) {
  * @param {Object} opts (optional)
  * @api public
  */
+
 module.exports = (path, opts) => {
   opts = defaults(opts || {}, {
     extension: 'html'
-  })
+  });
 
   debug('options: %j', opts)
 
@@ -129,22 +126,12 @@ module.exports = (path, opts) => {
         let ext = (extname(relPath) || '.' + opts.extension).slice(1);
         const paths = yield getPaths(path, relPath, ext)
 
-      let now = new Date();
-      if (ctx.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
-        ctx.body = locals;
-        return;
-      }
-
-      let ext = (extname(relPath) || '.' + opts.extension).slice(1)
-
-      return getPaths(path, relPath, ext)
-      .then((paths) => {
-        const state = ctx.state ? Object.assign(locals, ctx.state) : locals
+        var state = this.state ? Object.assign(locals, this.state) : {}
         debug('render `%s` with %j', paths.rel, state)
-        ctx.type = 'text/html'
+        this.type = 'text/html'
 
         if (isHtml(ext) && !opts.map) {
-          return send(ctx, paths.rel, {
+          yield send(this, paths.rel, {
             root: path
           })
         } else {
@@ -171,9 +158,9 @@ module.exports = (path, opts) => {
           }
           this.body = yield render(paths.rel, state)
         }
-      })
-    }
+      }
+    })
 
-    return next()
+    yield next
   }
 }
