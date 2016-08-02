@@ -10,7 +10,7 @@ const dirname = require('path').dirname
 const extname = require('path').extname
 const fmt = require('util').format
 const join = require('path').join
-const cons = require('co-views')
+const cons = require('co-views-velocity')
 const send = require('koa-send')
 const _stat = require('fs').stat
 
