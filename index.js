@@ -114,7 +114,8 @@ module.exports = (path, opts) => {
         }
 
         Object.assign(locals, {
-          constant: config.constant
+          constant: config.constant,
+          realpath: relPath
         });
 
         let now = new Date();
