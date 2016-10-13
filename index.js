@@ -121,9 +121,13 @@ module.exports = (path, opts) => {
         if(config.site.env != 'production') {
           switch(true) {
             case /__php__$/.test(this.req.url):
-              this.body = this.__back__;
+              let back = this.__back__ || {};
+              for(var p in back) {
+                back[p] = back[p].replace(/__php__(=[^&]*)?/, '');
+              }
+              this.body = back;
               return;
-            case /__pd__$/.test(this.req.url):
+            case /__data__$/.test(this.req.url):
               this.body = locals;
               return;
           }
