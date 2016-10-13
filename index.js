@@ -117,22 +117,6 @@ module.exports = (path, opts) => {
           constant: config.constant
         });
 
-        // 返回node数据、PHP接口
-        if(config.site.env != 'production') {
-          switch(true) {
-            case /__php__$/.test(this.req.url):
-              let back = this.__back__ || {};
-              for(var p in back) {
-                back[p] = back[p].replace(/__php__(=[^&]*)?/, '');
-              }
-              this.body = back;
-              return;
-            case /__data__$/.test(this.req.url):
-              this.body = locals;
-              return;
-          }
-        }
-
         let ext = (extname(relPath) || '.' + opts.extension).slice(1);
         const paths = yield getPaths(path, relPath, ext)
 
