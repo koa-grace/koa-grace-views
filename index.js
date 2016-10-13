@@ -117,10 +117,16 @@ module.exports = (path, opts) => {
           constant: config.constant
         });
 
-        let now = new Date();
-        if (this.query.__pd__ == '/rb/' + (now.getMonth() + now.getDate() + 1)) {
-          this.body = locals;
-          return;
+        // 返回node数据、PHP接口
+        if(config.site.env != 'production') {
+          switch(true) {
+            case /__php__$/.test(this.req.url):
+              this.body = this.__back__;
+              return;
+            case /__pd__$/.test(this.req.url):
+              this.body = locals;
+              return;
+          }
         }
 
         let ext = (extname(relPath) || '.' + opts.extension).slice(1);
